@@ -1,0 +1,8 @@
+*.xml
+Taxi_Data
+*.png
+*.txt
+*.bin
+Release
+x64
+Debug

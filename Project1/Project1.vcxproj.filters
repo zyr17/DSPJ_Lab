@@ -1,0 +1,137 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="MyForm.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="pugixml-1.7\src\pugixml.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="suffix.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="kdtree.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="spfa.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="astar.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="dijkstra.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="geometry.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="TDFP.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="maker.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="d_dijkstra.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="d_astar.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="MyForm.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="suffix.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="pugixml-1.7\src\pugixml.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="pugixml-1.7\src\pugiconfig.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="kdtree.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="spfa.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="astar.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="shortest_path_header.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="dijkstra.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="geometry.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="taxi_data.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="TDFP.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="maker.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="d_dijkstra.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="d_astar.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="common.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="..\shanghai_map.xml">
+      <Filter>资源文件</Filter>
+    </Xml>
+    <Xml Include="..\testmap.xml">
+      <Filter>资源文件</Filter>
+    </Xml>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="MyForm.resx">
+      <Filter>资源文件</Filter>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\test.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="..\test2.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="..\Icon.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Project1.rc">
+      <Filter>资源文件</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>
