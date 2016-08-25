@@ -18,7 +18,6 @@
 
 #define PI 3.14159265358979323846
 #define rand() (rand() * (RAND_MAX + 1) + rand())
-#define __convert_to_km 111.0
 
 double Clock();
 void MarshalString(System::String ^ s, std::string& os);
@@ -227,7 +226,8 @@ namespace Project1 {
 	};
 	const int select_size[map_level] = { 10, 6, 4, 3 };
 	const bool is_road_can_drive[way_color_size] = { 0, 1, 1, 1, 1, 1, 1, 1, 0, 0 };
-	const int normal_speed[] = { 120, 120, 100, 80, 60, 50, 40, 30, 30, 30, 30 };
+	const int normal_speed[] = { 120, 83.576733, 81.142355, 71.355321, 64.213594, 56.660978, 55.324040, 48.657423, 30, 30, 30 };
+	//const int normal_speed[] = { 120, 120, 100, 80, 60, 50, 40, 30, 30, 30, 30 };
 	//const int normal_speed[] = { 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100 };
 
 	std::vector<std::string> name_list;
@@ -2862,6 +2862,7 @@ public:  System::Void taxi_data_to_way(){
 			 	 tmid = sp_common::mid_point(tmp.id[0], tmp.id[1], dis, (opoint_out[tmp.id[0]] - opoint_out[tmp.id[1]]).len() - dis);
 			 }
 			 sp_dijkstra.taxi_data_fitting(taxi_data.size(), taxi_data, tmid, 3.0, 3.0, taxi_fitting_start, taxi_fitting_point, Taxi_Detail);
+			 if (!taxi_fitting_start.size()) return;
 			 for (int i = 0; i < Taxi_Detail.size() - 1; i++){
 				 int next = i;
 				 for (; Taxi_Detail[++next].time == -1;);

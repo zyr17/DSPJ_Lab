@@ -924,11 +924,12 @@ int main(){
 	
 
 	FILE *cout;
+/*
 #ifdef UPDATE_INPUT
 	cout = fopen(InputFile, "w");
 	fprintf(cout, "%d %d\n", form.points->Length, input_line.size());
 	for (int i = 0; i < form.points->Length; i++)
-		fprintf(cout, "%d %d\n", (int)(form.opoint[i].X * 1000000), (int)(form.opoint[i].Y * 10000000));
+		fprintf(cout, "%d %d\n", (int)(form.opoint[i].X * 10000000), (int)(form.opoint[i].Y * 10000000));
 	for (auto i : input_line)
 		fprintf(cout, "%d %d %d\n", i.x, i.y, i.z);
 	srand(unsigned(time(NULL) + clock()));
@@ -965,6 +966,7 @@ int main(){
 	printf("tdfp:update input ok!\n");
 #endif
 #endif
+*/
 	cout = fopen(InputFile, "r");
 	int tn, tm;
 	fscanf(cout, "%d%d", &tn, &tm);
@@ -1022,16 +1024,28 @@ int main(){
 	printf("tdfp:inputfile ok!\n");
 #endif
 
-#ifndef UPDATE_INPUT
+#ifdef UPDATE_INPUT
+	tdfp.init_timedata(normal_speed);
 	char ch[6] = "00000";
 	for (; ch[0] != '4';){
 		for (int i = 4; ++ch[i] == '9' + 1; ch[i--] = '0');
 		if (get_taxi_data((taxi_file_prefix + ch).c_str(), taxi_data, form.minlon, form.minlat, form.maxlon, form.maxlat)){
+			printf("make input %s\n", ch);
 			taxi_data_sort(taxi_data.size(), taxi_data);
 			form.taxi_data_to_way();
-
+			if (!taxi_fitting_point.size()){
+				FILE *outt = fopen("../temp.txt", "a");
+				fprintf(outt, "%s\n", ch);
+				fclose(outt);
+			}
+			std::vector<bool> choose = Taxi_Data_Choose(Taxi_Detail);
+			tdfp.update_timedata(Taxi_Detail, choose, 2, 2);
 		}
 	}
+	tdfp.print_timedata_result("../input2.txt");
+#ifdef DEBUG_LITTLE
+	printf("tdfp:make input ok!\n");
+#endif
 #endif
 
 

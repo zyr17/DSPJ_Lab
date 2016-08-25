@@ -170,6 +170,8 @@ namespace dijkstra{
 	}
 	void dijkstra::taxi_data_fitting(int tot, std::vector<Taxi_Data> &data, sp_common::mid_point start, double max_r, double p_rate, std::vector<int> &r_start, std::vector<geometry::Point> & res, std::vector<taxi_detail> & Taxi_Detail){
 		res.clear();
+		double Clock();
+		double starttime = Clock();
 		if (tot > data.size()) return;
 		geometry::Point tmp = point_pos[start.y] - point_pos[start.x];
 		r_start.push_back(0);
@@ -192,6 +194,13 @@ namespace dijkstra{
 			heap.push_back(std::make_pair(-last.z2, last.y));
 			double max_dis = max_r * (now_point - geometry::Point(data[i - 1].x, data[i - 1].y)).len() + (now_point - point_pos[last.x]).len() + (geometry::Point(data[i - 1].x, data[i - 1].y) - point_pos[last.x]).len();
 			for (; heap.size();){
+				if (Clock() - starttime > 15){
+					printf("too long!halt.\n");
+					r_start.clear();
+					res.clear();
+					Taxi_Detail.clear();
+					return;
+				}
 				int nowp = heap[0].second;
 				if (dis[nowp] != -heap[0].first || dis[nowp] > max_dis){
 					std::pop_heap(heap.begin(), heap.end());

@@ -15,3 +15,5 @@
 
 //#define UPDATE_INPUT
 //#define PRE_CALC
+
+#define __convert_to_km 111.0

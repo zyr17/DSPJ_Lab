@@ -678,3 +678,138 @@ double TDFP::oneside(int st, int ed, double time, std::vector<int> &route){
 	route = res;
 	return dist[ed];
 }
+void TDFP::init_timedata(const int *normalspeed){
+	for (int i = 0; i < edges.size(); i++)
+		for (int j = 0; j < TDFP_BLOCKS; j++)
+			edgetottime[j].push_back(std::make_pair(1.0, normalspeed[10 - edges[i].z]));
+	for (int i = 15; i--; )
+		roadspeed.push_back(std::make_pair(0.0, 0.0));
+	//printf("init timedata ok! %d\n", edgetottime[0].size());
+#ifdef TDFP_DEBUG
+	outtemp = fopen("../temp.txt", "w");
+#endif
+}
+void TDFP::update_timedata(std::vector<int> &inedges, int timegroup, double speed, double effect, int timespan){
+	if (isnan(speed)) return;
+#ifdef TDFP_DEBUG
+	fprintf(outtemp, "update_timedata[%d] timegroup:%d, speed %f, effect %f\n", inedges.size(), timegroup, speed, effect);
+	fflush(outtemp);
+#endif
+	for (auto i : inedges){
+#ifdef TDFP_DEBUG
+		fprintf(outtemp, "doing %d\n", i);
+		fflush(outtemp);
+#endif
+		for (int j = 0; j <= timespan; j++){
+			edgetottime[(j + timegroup) % TDFP_BLOCKS][i].first += effect * (1 - j / (timespan + 1.0));
+			edgetottime[(j + timegroup) % TDFP_BLOCKS][i].second += effect * (1 - j / (timespan + 1.0)) * speed;
+			if (j){
+				edgetottime[(TDFP_BLOCKS + timegroup - j) % TDFP_BLOCKS][i].first += effect * (1 - j / (timespan + 1.0));
+				edgetottime[(TDFP_BLOCKS + timegroup - j) % TDFP_BLOCKS][i].second += effect * (1 - j / (timespan + 1.0)) * speed;
+			}
+		}
+	}
+}
+void TDFP::update_timedata(std::vector<taxi_detail> &Taxi_Detail, std::vector<bool> & choose, int timespan, int areaspan){
+	int now = 0;
+	for (; now < Taxi_Detail.size() && (Taxi_Detail[now].tag == -1 || !choose[now]); now++);
+	for (;;){
+		update_timedata_time++;
+		if (now > Taxi_Detail.size()) return;
+#ifdef TDFP_DEBUG
+		fprintf(outtemp, "now: %d %d\n", now, Taxi_Detail[now].tag);
+		fflush(outtemp);
+#endif
+		int st = Taxi_Detail[now].tag;
+		int timegroup = Taxi_Detail[now].time / TDFP_timespan;
+#ifdef TDFP_DEBUG
+		fprintf(outtemp, "timeread: %f\n", Taxi_Detail[now].time);
+		fflush(outtemp);
+#endif
+		double dist = 0, time = 0;
+		for (now++;;){
+			if (now > Taxi_Detail.size()) break;
+			if (choose[now]){
+				time += now ? Taxi_Detail[now].time - Taxi_Detail[now - 1].time : Taxi_Detail[now].time;
+				dist += Taxi_Detail[now].dis;
+				if (Taxi_Detail[now].tag == -1) now++;
+				else break;
+			}
+			else now++;
+		}
+		if (now > Taxi_Detail.size()) return;
+		if (time <1e-3) continue;
+		int ed = Taxi_Detail[now].tag;
+		std::vector<int> inedges;
+		int num = -1;
+		for (int i = 0; i < list[st].size(); i++)
+			if (list[st][i].to == ed)
+				num = list[st][i].num;
+		if (num < 0 || !(timegroup >= 0 && timegroup < TDFP_BLOCKS)) continue;
+		inedges.push_back(num);
+		last_update_timedata[num] = update_timedata_time;
+		double noweffect = 1;
+		dist = dist * __convert_to_km / (time / 3600);
+		if (!isnan(dist)){
+			roadspeed[edges[num].z].first += 1;
+			roadspeed[edges[num].z].second += dist;
+		}
+		for (; noweffect > 1e-5;){
+			update_timedata(inedges, timegroup, dist, noweffect, timespan);
+			noweffect -= 1.0 / (areaspan + 1);
+			if (noweffect < 1e-5) break;
+			std::vector<int> tmp;
+			for (auto i : inedges){
+				for (auto j : list[edges[i].x])
+					if (last_update_timedata[j.num] != update_timedata_time){
+						last_update_timedata[j.num] = update_timedata_time;
+						tmp.push_back(j.num);
+					}
+				for (auto j : list[edges[i].y])
+					if (last_update_timedata[j.num] != update_timedata_time){
+						last_update_timedata[j.num] = update_timedata_time;
+						tmp.push_back(j.num);
+					}
+			}
+			inedges = tmp;
+		}
+	}
+}
+void TDFP::print_timedata_result(const char *InputFile){
+	FILE *cout = fopen(InputFile, "w");
+	fprintf(cout, "%d %d\n", point.size(), edges.size());
+	for (int i = 0; i < point.size(); i++)
+		fprintf(cout, "%d %d\n", (int)(point[i].x), (int)(point[i].y));
+	for (auto i : edges)
+		fprintf(cout, "%d %d %d\n", i.x, i.y, 10 - i.z);
+
+	//FILE *ccc = fopen("../temp.txt", "w");
+
+	for (int i = 0; i < edges.size(); i++){
+		bool print = 0;
+		for (int j = 0; j < TDFP_BLOCKS; j++)
+			if (edgetottime[j][i].first != 1) print = 1;
+		//if (!print) continue;
+		double distance = (point[edges[i].x] - point[edges[i].y]).len() / 10000000;
+		//fprintf(ccc, "%d %f %f %f\n", i, distance, edges[i].add, distance - edges[i].add);
+		distance = distance * __convert_to_km * 1000;
+		distance = distance * 3.6;
+		fprintf(cout, "%d", TDFP_BLOCKS + 1);
+		for (int j = 0; j < TDFP_BLOCKS; j++)
+			fprintf(cout, " %d %.6f", j * TDFP_timespan, distance / (edgetottime[j][i].second / edgetottime[j][i].first));
+		fprintf(cout, " %d %.6f\n", 86400, distance / (edgetottime[0][i].second / edgetottime[0][i].first));
+	}
+	fclose(cout);
+#ifdef TDFP_DEBUG
+	fclose(outtemp);
+#endif
+	//output average speed
+	/*
+	cout = fopen("../temp.txt", "w");
+	for (int j = 0; j < roadspeed.size(); j++){
+		auto i = roadspeed[j];
+		if (i.first != 0) fprintf(cout, "%f %e %e\n", i.second / i.first, i.first, i.second);
+		else fprintf(cout, "no data\n");
+	}
+	fclose(cout);*/
+}
