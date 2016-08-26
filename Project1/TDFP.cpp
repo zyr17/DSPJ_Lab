@@ -1,7 +1,8 @@
 #include "TDFP.h"
 inline double TDFP::estimate_func(int now, int dest, double last){
 	if (last < 0) last = 0;
-	return has_group[now] && has_group[dest] ? LTT_p2e[now] + LTT_e2e[has_group[now]][has_group[dest]] + LTT_e2p[dest] : 
+	return has_group[now] && has_group[now] == has_group[dest] ? 0 : 
+		   has_group[now] && has_group[dest] ? LTT_p2e[now] + LTT_e2e[has_group[now]][has_group[dest]] + LTT_e2p[dest] : 
 		   has_group[now] ? no_group2e[has_group[now]][no_group_id[dest]] :
 		   has_group[dest] ? no_group2e[has_group[dest]][no_group_id[now]] : last;
 }
@@ -311,7 +312,7 @@ double TDFP::bruteforce(int start, int end, double start_time){
 	}
 	return dis[end];
 }
-double TDFP::get_real_dis(int st, double time){
+inline double TDFP::get_real_dis(int st, double time){
 
 	//printf("-real dis: %d %f %f-\n", st, edges[st].add, edge_time[st][0].second);
 	//return edges[st].add;
@@ -469,7 +470,7 @@ void TDFP::inputfile(){
 	printf("bin file read %d.\n", ans);
 	fclose(out2);
 }
-double TDFP::mainway(int st, int ed, double time, std::vector<int> &route){
+double TDFP::mainway2(int st, int ed, double time, std::vector<int> &route){
 	calc_time++;
 #ifdef DEBUG_LITTLE
 	mv1num = mv2num = mv3num = 0;
@@ -667,6 +668,94 @@ double TDFP::oneside(int st, int ed, double time, std::vector<int> &route){
 				heap.push_back(std::make_pair(last_esti[num] = dist[num] + ested, num));
 				std::push_heap(heap.begin(), heap.end(), cmp);
 			}
+		}
+	}
+
+
+	res.clear();
+	for (int j = ed; j; j = fa[j])
+		res.push_back(j);
+	std::reverse(res.begin(), res.end());
+	route = res;
+	return dist[ed];
+}
+double TDFP::mainway(int st, int ed, double time, std::vector<int> &route){
+	//calc_time++;
+#ifdef DEBUG_LITTLE
+	mv2num = 0;
+#endif
+	auto cmp = [](std::pair<double, int> a, std::pair<double, int> b) { return a > b; };
+	for (int i = 0; i < s_tot; i++){
+		s_heap[i].clear();
+		now_in[i] = 0;
+	}
+	std::vector<int> res;
+	double nowmin = line_max;
+	int nowid = -1;
+	route.clear();
+	std::vector<std::pair<double, int>> heap;
+	heap.clear();
+#ifdef DEBUG_LITTLE
+	mvis2.clear();
+#endif
+	heap.push_back(std::make_pair(last_esti[st] = time + estimate_func(st, ed), st));
+	now_in[has_group[st]]++;
+	for (int i = 0; i < n; i++){
+		dist[i] = 1e100;
+	}
+	dist[st] = time;
+	fa[st] = 0;
+
+	for (; heap.size();){//printf("|%d %d %.0f %d %.0f %d|\n", heap.size(), heapb.size(), heap[0].first, heap[0].second, heapb[0].first, heapb[0].second);
+		if (heap[0].first != last_esti[heap[0].second]){// last_calc[heap[0].second] == calc_time){
+			now_in[has_group[heap[0].second]]--;
+			std::pop_heap(heap.begin(), heap.end(), cmp);
+			heap.pop_back();
+			continue;
+		}
+		if (heap[0].second == ed) break;// && (!has_group[ed] || !s_heap[has_group[ed]].size() || s_heap[has_group[ed]][0].first > dist[ed])
+		int now = heap[0].second;
+		int nowg = has_group[now];
+		//printf("%d %d %d %d\n", now, nowg, now_in[nowg], heap.size());
+		//getchar();
+		//last_calc[now] = calc_time;
+#ifdef DEBUG_LITTLE
+		mvis2.insert(now);
+		mv2num++;
+#endif
+		std::pop_heap(heap.begin(), heap.end(), cmp);
+		heap.pop_back();
+		now_in[nowg]--;
+		for (int i = 0; i < list[now].size(); i++){
+			double realdis = get_real_dis(list[now][i].num, dist[now]);
+			int num = list[now][i].to;
+			double ested = estimate_func(num, ed, last_esti[now] - dist[now] - realdis);
+			if (dist[num] > dist[now] + realdis){// && last_esti[num] != dist[num] + ested
+				//if (last_calc[num] == calc_time) printf("%d %f %f %f %f\n", num, dist[num], dist[now] + realdis, last_esti[num], dist[now] + realdis + ested);
+				//last_calc[num] = 0;
+				dist[num] = dist[now] + realdis;
+				fa[num] = now;
+				if (!nowg || nowg == has_group[num] && (!s_heap[nowg].size() || s_heap[nowg][0].first >= dist[num])){
+					now_in[has_group[num]]++;
+					heap.push_back(std::make_pair(last_esti[num] = dist[num] + ested, num));
+					std::push_heap(heap.begin(), heap.end(), cmp);
+				}
+				else{
+					s_heap[nowg].push_back(std::make_pair(dist[num], num));// + (has_group[num] ? LTT_p2e[num] : 0)
+					std::push_heap(s_heap[nowg].begin(), s_heap[nowg].end(), cmp);
+					last_esti[num] = dist[num] + ested;
+				}
+			}
+		}
+		if (!now_in[nowg] && s_heap[nowg].size()){
+			do{
+				int num = s_heap[nowg][0].second;
+				now_in[has_group[num]]++;
+				heap.push_back(std::make_pair(last_esti[num], num));
+				std::push_heap(heap.begin(), heap.end(), cmp);
+				std::pop_heap(s_heap[nowg].begin(), s_heap[nowg].end(), cmp);
+				s_heap[nowg].pop_back();
+			} while (s_heap[nowg].size() && (has_group[s_heap[nowg][0].second] == nowg || !now_in[nowg]));
 		}
 	}
 

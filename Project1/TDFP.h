@@ -48,11 +48,13 @@ private:
 	inline double estimate_func(int now, int dest, double last = 0);
 	inline double estimate_funcb(int now, int dest, double last = 0);
 	void add_empty(int s_num, int k);
-	double get_real_dis(int st, double time);
+	inline double get_real_dis(int st, double time);
 	int calc_time = 0;
 	int last_calc[N], last_calcb[N];
 	int last_update_timedata[N];
 	int update_timedata_time;
+	int now_in[2222];
+	std::vector<std::pair<double, int>> s_heap[2222];
 public:
 	std::vector<Three> edges;//x, y:point; z:road level
 	std::vector<std::pair<double, double>> edgetottime[TDFP_BLOCKS], roadspeed;
@@ -83,6 +85,7 @@ public:
 	void outputfile();
 	void inputfile();
 	double mainway(int st, int ed, double time, std::vector<int> &res);
+	double mainway2(int st, int ed, double time, std::vector<int> &res);
 	double oneside(int st, int ed, double time, std::vector<int> &res);
 	void init_timedata(const int *normalspeed);
 	void update_timedata(std::vector<int> &inedges, int timegroup, double speed, double effect, int timespan);
